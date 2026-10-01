@@ -1,9 +1,9 @@
+#include <gtest/gtest.h>
+
 #include "utils/json.h"
 
 #include <chrono>
 #include <cstdint>
-#include <cstdlib>
-#include <iostream>
 #include <limits>
 #include <optional>
 #include <string>
@@ -41,13 +41,11 @@ template <> struct enum_traits<TestField> {
 };
 }
 
-void expect(std::string actual, std::string expected) {
-    if (actual == expected) return;
-    std::cerr << "Expected: " << expected << "\nActual: " << actual << '\n';
-    std::abort();
+void expect(const std::string& actual, const std::string& expected) {
+    EXPECT_EQ(actual, expected);
 }
 
-void optional_fields() {
+TEST(Json, OptionalFields) {
     JsonObject json;
     json.string("absent", std::optional<std::string>{});
     json.boolean("absent", std::optional<bool>{});
@@ -59,7 +57,7 @@ void optional_fields() {
     expect(std::move(json).finish(), R"({"empty":"","false":false,"zero":0,"enum":"value"})");
 }
 
-void nested_values() {
+TEST(Json, NestedValues) {
     JsonObject json(rhadar::EnumStringFormat::Abbreviated);
     json.object("empty", [](JsonObject&) {});
     json.object("child", [](JsonObject& child) {
@@ -80,14 +78,14 @@ void nested_values() {
     expect(std::move(json).finish(), R"({"empty":{},"child":{"items":[{"v":1},["text",false,18446744073709551615],[]],"sibling":"ok"},"strings":["a","b"],"empty_array":[],"last":true})");
 }
 
-void escaping() {
+TEST(Json, Escaping) {
     JsonObject json;
     json.string("\"\\\n", std::string("\"\\\b\f\n\r\t\0\x01\x1f", 10) + "Grüße 🌱");
     json.array("array", [](JsonArray& array) { array.string("\"\n"); });
     expect(std::move(json).finish(), R"({"\"\\\n":"\"\\\b\f\n\r\t\u0000\u0001\u001fGrüße 🌱","array":["\"\n"]})");
 }
 
-void integers_and_durations() {
+TEST(Json, IntegersAndDurations) {
     JsonObject json;
     json.integer("min", std::numeric_limits<std::int64_t>::min());
     json.integer("max", std::numeric_limits<std::int64_t>::max());
@@ -102,10 +100,6 @@ void integers_and_durations() {
     expect(std::move(json).finish(), R"({"min":-9223372036854775808,"max":9223372036854775807,"unsigned":18446744073709551615,"byte":255,"negative":-128,"seconds":0,"ms":-123,"unsigned_duration":18446744073709551615})");
 }
 
-int main() {
+TEST(Json, EmptyObject) {
     expect(JsonObject{}.finish(), "{}");
-    optional_fields();
-    nested_values();
-    escaping();
-    integers_and_durations();
 }

@@ -1,28 +1,50 @@
-name: Build and test
+name: CMake on a single platform
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+  BUILD_SHARED_LIBS: OFF
+  MAKE_INSTALLABLE: ON
+  BUILD_EXECUTABLE: ON
+  BUILD_TESTING: ON
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        shared: [ON, OFF]
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Configure
-        run: >-
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-          -DBUILD_SHARED_LIBS=${{ matrix.shared }}
-          -DCMAKE_CXX_FLAGS="-Wall -Wextra -Werror -pedantic -fno-exceptions -fno-rtti"
-      - name: Build
-        run: cmake --build build --parallel
-      - name: Test
-        run: ctest --test-dir build --output-on-failure
-      - name: Install
-        run: cmake --install build --prefix "$RUNNER_TEMP/rhadar-install"
+    - uses: actions/checkout@v4
+
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@v2
+      with:
+        cmake-version: '4.2.x'
+
+    - name: Configure CMake
+      run: |
+        cmake -S . -B ${{github.workspace}}/build                    \
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}                     \
+          -DBUILD_TESTING=${{env.BUILD_TESTING}}                     \
+          -DBUILD_EXECUTABLE=${{env.BUILD_EXECUTABLE}}               \
+          -DMAKE_INSTALLABLE=${{env.MAKE_INSTALLABLE}}               \
+          -DBUILD_SHARED_LIBS=${{env.BUILD_SHARED_LIBS}}             \
+          -DCMAKE_INSTALL_PREFIX:PATH=$GITHUB_WORKSPACE/test_install \
+          -DFETCHCONTENT_UPDATES_DISCONNECTED=ON
+
+    - name: Build
+      working-directory: ${{github.workspace}}/build
+      run: cmake --build . --config ${{env.BUILD_TYPE}}
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: ctest -C ${{env.BUILD_TYPE}} --output-on-failure
+
+    - name: Test Install
+      working-directory: ${{github.workspace}}/build
+      run: cmake --install . --config ${{env.BUILD_TYPE}}

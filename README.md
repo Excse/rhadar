@@ -283,7 +283,7 @@ characters but preserves non-ASCII bytes without validating their encoding.
 
 ## Build and test
 
-Requires CMake 3.21 or later and a compiler with C++23 `std::expected` support
+Requires CMake 3.24 or later and a compiler with C++23 `std::expected` support
 (for example GCC 13 or later).
 
 ```sh
@@ -292,7 +292,9 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-The host tests run through CTest without external test dependencies. They cover
+The host tests use the template’s GoogleTest setup and run through CTest.
+GoogleTest is downloaded during configuration when `BUILD_TESTING` is enabled.
+The tests cover
 complete discovery messages, validation, JSON nesting, escaping, optional fields,
 integer boundaries, durations, and connections.
 
@@ -305,9 +307,9 @@ add_subdirectory(path/to/rhadar)
 target_link_libraries(your_target PRIVATE rhadar::rhadar)
 ```
 
-The target propagates its include directory and C++23 requirement. Tests and
+The target propagates its include directory and C++23 requirement. Tests, the example executable, and
 installation default to enabled for standalone builds and disabled when embedded
-in another CMake project. Override with `RHADAR_BUILD_TESTING` and `RHADAR_INSTALL`.
+in another CMake project. Override with `BUILD_TESTING`, `BUILD_EXECUTABLE`, and `MAKE_INSTALLABLE`.
 Static libraries are the default; use `BUILD_SHARED_LIBS=ON` for a shared build.
 
 To install and consume as a package:
