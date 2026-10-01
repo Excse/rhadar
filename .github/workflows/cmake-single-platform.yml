@@ -11,7 +11,6 @@ env:
   BUILD_TYPE: Release
   BUILD_SHARED_LIBS: OFF
   MAKE_INSTALLABLE: ON
-  BUILD_EXECUTABLE: ON
   BUILD_TESTING: ON
 
 jobs:
@@ -31,7 +30,6 @@ jobs:
         cmake -S . -B ${{github.workspace}}/build                    \
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}                     \
           -DBUILD_TESTING=${{env.BUILD_TESTING}}                     \
-          -DBUILD_EXECUTABLE=${{env.BUILD_EXECUTABLE}}               \
           -DMAKE_INSTALLABLE=${{env.MAKE_INSTALLABLE}}               \
           -DBUILD_SHARED_LIBS=${{env.BUILD_SHARED_LIBS}}             \
           -DCMAKE_INSTALL_PREFIX:PATH=$GITHUB_WORKSPACE/test_install \

@@ -307,9 +307,9 @@ add_subdirectory(path/to/rhadar)
 target_link_libraries(your_target PRIVATE rhadar::rhadar)
 ```
 
-The target propagates its include directory and C++23 requirement. Tests, the example executable, and
+The target propagates its include directory and C++23 requirement. Tests and
 installation default to enabled for standalone builds and disabled when embedded
-in another CMake project. Override with `BUILD_TESTING`, `BUILD_EXECUTABLE`, and `MAKE_INSTALLABLE`.
+in another CMake project. Override with `BUILD_TESTING` and `MAKE_INSTALLABLE`.
 Static libraries are the default; use `BUILD_SHARED_LIBS=ON` for a shared build.
 
 To install and consume as a package:
@@ -332,3 +332,13 @@ application component's CMakeLists.txt, and link `rhadar::rhadar` to that compon
 With this explicit integration, set `lib_ignore = rhadar` in PlatformIO to avoid
 compiling the same library through its automatic library builder as well.
 The ESP32 toolchain must support C++23 and `std::expected`.
+
+## VS Code
+
+Open this repository folder and install the recommended C/C++ and CMake Tools
+extensions. Use **Terminal → Run Task** for Debug, Release, and shared-library
+configure/build/test/install/clean tasks and Doxygen documentation generation.
+**Ctrl+Shift+B** builds Debug; **Run and Debug** provides GDB profiles for the
+unit tests. The test profile prompts for a GoogleTest filter; `*` runs all tests.
+Builds use separate directories under `build/vscode`; install tasks write into
+`build/vscode/install` without requiring system-wide installation.

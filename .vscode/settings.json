@@ -1,0 +1,5 @@
+{
+    "cmake.configureOnOpen": false,
+    "cmake.buildDirectory": "${workspaceFolder}/build/vscode/debug",
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/vscode/debug/compile_commands.json"
+}

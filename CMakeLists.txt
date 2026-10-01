@@ -8,8 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Option to enable/disable testing:
 option(BUILD_TESTING "Enable testing" ${PROJECT_IS_TOP_LEVEL})
-# Option to enable/disable executable:
-option(BUILD_EXECUTABLE "Create executable" ${PROJECT_IS_TOP_LEVEL})
 # Option to enable/disable installation:
 option(MAKE_INSTALLABLE "Make the library installable" ${PROJECT_IS_TOP_LEVEL})
 # Option to control static vs shared library
@@ -67,18 +65,6 @@ set_target_properties(${PROJECT_NAME}
         PROPERTIES
         VERSION ${PROJECT_VERSION}
         SOVERSION ${PROJECT_VERSION_MAJOR})
-
-
-### --- Define Executable Target --- ###
-
-if(BUILD_EXECUTABLE)
-    # Create the main executable from the main source file
-    add_executable(${PROJECT_NAME}_app src/main.cpp)
-    # Link the library with the application
-    target_link_libraries(${PROJECT_NAME}_app PRIVATE ${PROJECT_NAME})
-    # Includes the headers to the application
-    target_include_directories(${PROJECT_NAME}_app PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-endif()
 
 
 ### --- Install Rules --- ###
