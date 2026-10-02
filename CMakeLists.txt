@@ -2,21 +2,15 @@
 cmake_minimum_required(VERSION 3.24)             # Compatible with the ESP-IDF CMake toolchain
 project(rhadar VERSION 0.1.0 LANGUAGES CXX) # Define project name, version, and language
 
-# Use C++23 and enforce it
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 # Option to enable/disable testing:
-option(BUILD_TESTING "Enable testing" ${PROJECT_IS_TOP_LEVEL})
+option(RHADAR_BUILD_TESTING "Enable testing" ${PROJECT_IS_TOP_LEVEL})
 # Option to enable/disable installation:
-option(MAKE_INSTALLABLE "Make the library installable" ${PROJECT_IS_TOP_LEVEL})
+option(RHADAR_INSTALL "Make the library installable" ${PROJECT_IS_TOP_LEVEL})
 # Option to control static vs shared library
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
 ### --- CMake Modules for Installation and Fetching --- ###
-include(CMakePackageConfigHelpers) # Helper for creating config files for package managers
 include(GNUInstallDirs)            # Define standard install directories (lib, include, etc.)
-include(FetchContent)              # For downloading and using external dependencies
 
 
 ### --- Define Library Target --- ##
@@ -34,7 +28,7 @@ add_library(${PROJECT_NAME}
 # Create an alias for the library: rhadar::rhadar
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 # Propagate the required C++ standard to consumers, including installed targets.
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_${CMAKE_CXX_STANDARD})
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
 
 # Setup include directories for consumers and installers
 target_include_directories(
@@ -60,16 +54,19 @@ set(PUBLIC_HEADERS
 # Include public headers in the library target.
 target_sources(${PROJECT_NAME} PRIVATE ${PUBLIC_HEADERS})
 
-# Set the properties of the resulting library
-set_target_properties(${PROJECT_NAME}
-        PROPERTIES
-        VERSION ${PROJECT_VERSION}
-        SOVERSION ${PROJECT_VERSION_MAJOR})
+# Version shared library artifacts; static archives do not need these properties.
+if(BUILD_SHARED_LIBS)
+    set_target_properties(${PROJECT_NAME}
+            PROPERTIES
+            VERSION ${PROJECT_VERSION}
+            SOVERSION ${PROJECT_VERSION_MAJOR})
+endif()
 
 
 ### --- Install Rules --- ###
 
-if(MAKE_INSTALLABLE)
+if(RHADAR_INSTALL)
+    include(CMakePackageConfigHelpers)
     # Install the library and its headers
     install(TARGETS ${PROJECT_NAME}
             EXPORT ${PROJECT_NAME}Targets
@@ -107,7 +104,8 @@ endif ()
 
 ### --- Unit Testing Setup --- ###
 
-if(BUILD_TESTING)
+if(RHADAR_BUILD_TESTING)
+    include(FetchContent)
     # Enable testing framework
     enable_testing()
     # Adds the test directory to the build

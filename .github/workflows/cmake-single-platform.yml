@@ -10,8 +10,8 @@ on:
 env:
   BUILD_TYPE: Release
   BUILD_SHARED_LIBS: OFF
-  MAKE_INSTALLABLE: ON
-  BUILD_TESTING: ON
+  RHADAR_INSTALL: ON
+  RHADAR_BUILD_TESTING: ON
 
 jobs:
   build:
@@ -29,8 +29,8 @@ jobs:
       run: |
         cmake -S . -B ${{github.workspace}}/build                    \
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}                     \
-          -DBUILD_TESTING=${{env.BUILD_TESTING}}                     \
-          -DMAKE_INSTALLABLE=${{env.MAKE_INSTALLABLE}}               \
+          -DRHADAR_BUILD_TESTING=${{env.RHADAR_BUILD_TESTING}}                     \
+          -DRHADAR_INSTALL=${{env.RHADAR_INSTALL}}               \
           -DBUILD_SHARED_LIBS=${{env.BUILD_SHARED_LIBS}}             \
           -DCMAKE_INSTALL_PREFIX:PATH=$GITHUB_WORKSPACE/test_install \
           -DFETCHCONTENT_UPDATES_DISCONNECTED=ON

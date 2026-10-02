@@ -12,8 +12,8 @@
                 "${workspaceFolder}/build/vscode/debug",
                 "-DCMAKE_BUILD_TYPE=Debug",
                 "-DBUILD_SHARED_LIBS=OFF",
-                "-DBUILD_TESTING=ON",
-                "-DMAKE_INSTALLABLE=ON",
+                "-DRHADAR_BUILD_TESTING=ON",
+                "-DRHADAR_INSTALL=ON",
                 "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
             ],
             "options": {
@@ -108,8 +108,8 @@
                 "${workspaceFolder}/build/vscode/release",
                 "-DCMAKE_BUILD_TYPE=Release",
                 "-DBUILD_SHARED_LIBS=OFF",
-                "-DBUILD_TESTING=ON",
-                "-DMAKE_INSTALLABLE=ON",
+                "-DRHADAR_BUILD_TESTING=ON",
+                "-DRHADAR_INSTALL=ON",
                 "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
             ],
             "options": {
@@ -198,8 +198,8 @@
                 "${workspaceFolder}/build/vscode/shared",
                 "-DCMAKE_BUILD_TYPE=Debug",
                 "-DBUILD_SHARED_LIBS=ON",
-                "-DBUILD_TESTING=ON",
-                "-DMAKE_INSTALLABLE=ON",
+                "-DRHADAR_BUILD_TESTING=ON",
+                "-DRHADAR_INSTALL=ON",
                 "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
             ],
             "options": {

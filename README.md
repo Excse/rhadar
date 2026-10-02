@@ -293,7 +293,7 @@ ctest --test-dir build --output-on-failure
 ```
 
 The host tests use the template’s GoogleTest setup and run through CTest.
-GoogleTest is downloaded during configuration when `BUILD_TESTING` is enabled.
+GoogleTest is downloaded during configuration when `RHADAR_BUILD_TESTING` is enabled.
 The tests cover
 complete discovery messages, validation, JSON nesting, escaping, optional fields,
 integer boundaries, durations, and connections.
@@ -309,8 +309,12 @@ target_link_libraries(your_target PRIVATE rhadar::rhadar)
 
 The target propagates its include directory and C++23 requirement. Tests and
 installation default to enabled for standalone builds and disabled when embedded
-in another CMake project. Override with `BUILD_TESTING` and `MAKE_INSTALLABLE`.
+in another CMake project. Override with `RHADAR_BUILD_TESTING` and `RHADAR_INSTALL`.
 Static libraries are the default; use `BUILD_SHARED_LIBS=ON` for a shared build.
+`BUILD_SHARED_LIBS` intentionally uses CMake's standard option name: it controls
+the type chosen by `add_library()` when no explicit type is provided. This lets
+the parent project choose static or shared libraries consistently. The test and
+installation options are specific to rhadar, so they use the `RHADAR_` prefix.
 
 To install and consume as a package:
 
@@ -327,11 +331,74 @@ Set `CMAKE_PREFIX_PATH` to the installation prefix when configuring the consumer
 
 ## ESP-IDF and PlatformIO
 
-Keep the checkout under `lib/rhadar`, add it using `add_subdirectory()` from your
-application component's CMakeLists.txt, and link `rhadar::rhadar` to that component.
-With this explicit integration, set `lib_ignore = rhadar` in PlatformIO to avoid
-compiling the same library through its automatic library builder as well.
-The ESP32 toolchain must support C++23 and `std::expected`.
+Rhadar is a standalone CMake library. Link its target from your application
+component; no ESP-IDF-specific source list or wrapper component is needed for
+this setup. Use CMake 3.24 or newer and a toolchain supporting C++23 and
+`std::expected`.
+
+For a native ESP-IDF project, place the checkout at `lib/rhadar`:
+
+```text
+your-project/
+├── CMakeLists.txt
+├── lib/rhadar/
+└── main/
+    ├── CMakeLists.txt
+    └── main.cpp
+```
+
+In the project's root `CMakeLists.txt`:
+
+```cmake
+cmake_minimum_required(VERSION 3.24)
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+project(your_project)
+```
+
+In `main/CMakeLists.txt`:
+
+```cmake
+idf_component_register(SRCS "main.cpp" INCLUDE_DIRS ".")
+
+# Explicitly disable host tests and installation for the firmware build.
+# ESP-IDF's project handling can differ from a standard CMake subproject.
+set(RHADAR_BUILD_TESTING OFF)
+set(RHADAR_INSTALL OFF)
+set(BUILD_SHARED_LIBS OFF)
+add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/../lib/rhadar"
+                 "${CMAKE_CURRENT_BINARY_DIR}/rhadar")
+target_link_libraries(${COMPONENT_LIB} PRIVATE rhadar::rhadar)
+```
+
+Include `<rhadar.h>` in `main.cpp` and use the builders shown above. The target
+supplies the include path and C++23 requirement automatically. Rhadar builds
+discovery topics and payloads; your application owns the MQTT connection and
+publishes them. If using ESP-MQTT, add `mqtt` to the component's `PRIV_REQUIRES`
+and provide that component through your ESP-IDF installation or component
+manifest. The MQTT publishing example above shows how to send a built message.
+
+With the ESP-IDF environment activated, build from the project root:
+
+```sh
+idf.py set-target esp32
+idf.py build
+```
+
+For PlatformIO, use the same component CMake code in `src/CMakeLists.txt` with
+`SRCS "main.cpp"`, keeping the library at `lib/rhadar`. Configure `platformio.ini`:
+
+```ini
+[env:esp32dev]
+platform = espressif32
+board = esp32dev
+framework = espidf
+lib_ignore = rhadar
+```
+
+`lib_ignore` leaves compilation to the CMake target, avoiding a second build
+through PlatformIO's automatic library builder. Build with
+`pio run -e esp32dev`. Run rhadar's host tests separately using the standalone
+CMake commands above.
 
 ## VS Code
 
